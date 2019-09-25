@@ -28,6 +28,8 @@ def apply_coupons(cart, coupons)
   coupons.each do |coupon|
     
   item = coupon[:item] 
+  
+  if cart[item]
     
   if cart[item][:count] >= coupon[:num] && !cart.has_key?("#{item} W/COUPON")
     
@@ -38,23 +40,43 @@ def apply_coupons(cart, coupons)
                                
       cart[item][:count] -= coupon[:num]
       
+      
    elsif cart[item][:count] >= coupon[:num] && cart.has_key?("#{item} W/COUPON")
    
          cart["#{item} W/COUPON"][:count] += coupon[:num]
          cart[item][:count] -= coupon[:num]
          
+       end  
      end
    end
-  end
-
+   cart
+  end 
+   
 
 
 def apply_clearance(cart)
-  # code here
+  
+  cart.each do |product, stats| 
+    
+       stats[:price] -= stats[:price] * 0.20 if stats[:clearance]
+       
+   end
+  return cart
 end
 
 
 
 def checkout(cart, coupons)
-  # code here
+  
+  hash_cart = consolidate_cart(cart)
+  applied_coupons = apply_coupons(hash_cart, coupons)
+  applied_discount = apply_clearance(applied_coupons)
+  
+  total = applied_discount.reduce(0)  { |acc, (key, value) | acc += value[:price] * value[:count]} 
+  
+  total > 100 ? total * 0.90 : total 
+  
+
 end
+
+
